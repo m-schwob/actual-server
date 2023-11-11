@@ -16,10 +16,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actual-app/web@npm:23.11.0":
+"@actual-app/web@file:../actual/packages/desktop-client::locator=actual-sync%40workspace%3A.":
   version: 23.11.0
-  resolution: "@actual-app/web@npm:23.11.0"
-  checksum: b9a40aa063ece380bf8bdd789bae5d3580c2db0cb9d4d5a38a3b9ec0b568f1a41d06d84fdb17e5a85ddaec6a2477e38793754986ea68291c2dcb66d06d94cce8
+  resolution: "@actual-app/web@file:../actual/packages/desktop-client#../actual/packages/desktop-client::hash=2b4197&locator=actual-sync%40workspace%3A."
+  checksum: 951a8557a50babe30ac18fa73f541734bd4def7edefb007dd879999d0660e602ed6c853f7fd01462de895849354208faf78904c21d4944021b4d1c05f19189d2
   languageName: node
   linkType: hard
 
@@ -1611,7 +1611,7 @@ __metadata:
   resolution: "actual-sync@workspace:."
   dependencies:
     "@actual-app/crdt": 2.1.0
-    "@actual-app/web": 23.11.0
+    "@actual-app/web": "file:../actual/packages/desktop-client"
     "@babel/preset-typescript": ^7.20.2
     "@types/bcrypt": ^5.0.0
     "@types/better-sqlite3": ^7.6.5
