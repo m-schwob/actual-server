@@ -6,6 +6,9 @@ import { Transaction, Balance } from '../gocardless-node.types.js';
 
 export interface IBank {
   institutionIds: string[];
+
+  accessValidForDays: number;
+
   /**
    * Returns normalized object with required data for the frontend
    */
@@ -24,7 +27,7 @@ export interface IBank {
   normalizeTransaction: (
     transaction: Transaction,
     booked: boolean,
-  ) => (Transaction & { date?: string }) | null;
+  ) => (Transaction & { date?: string; payeeName: string }) | null;
 
   /**
    * Function sorts an array of transactions from newest to oldest

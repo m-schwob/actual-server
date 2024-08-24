@@ -1,9 +1,10 @@
 import * as d from 'date-fns';
 import {
-  sortByBookingDateOrValueDate,
   amountToInteger,
   printIban,
+  sortByBookingDateOrValueDate,
 } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -18,6 +19,14 @@ const SORTED_BALANCE_TYPE_LIST = [
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   institutionIds: ['IntegrationBank'],
+
+  // EEA need to allow at least 180 days now but this doesn't apply to UK
+  // banks, and it's possible that there are EEA banks which still don't follow
+  // the new requirements. See:
+  // - https://nordigen.zendesk.com/hc/en-gb/articles/13239212055581-EEA-180-day-access
+  // - https://nordigen.zendesk.com/hc/en-gb/articles/6760902653085-Extended-history-and-continuous-access-edge-cases
+  accessValidForDays: 90,
+
   normalizeAccount(account) {
     console.log(
       'Available account properties for new institution integration',
@@ -51,6 +60,7 @@ export default {
     }
     return {
       ...transaction,
+      payeeName: formatPayeeName(transaction),
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
     };
   },

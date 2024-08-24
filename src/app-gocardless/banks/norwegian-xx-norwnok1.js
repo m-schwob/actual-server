@@ -1,11 +1,12 @@
-import {
-  printIban,
-  amountToInteger,
-  sortByBookingDateOrValueDate,
-} from '../utils.js';
+import Fallback from './integration-bank.js';
+
+import { printIban, amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: [
     'NORWEGIAN_NO_NORWNOK1',
     'NORWEGIAN_SE_NORWNOK1',
@@ -14,6 +15,8 @@ export default {
     'NORWEGIAN_ES_NORWNOK1',
     'NORWEGIAN_FI_NORWNOK1',
   ],
+
+  accessValidForDays: 180,
 
   normalizeAccount(account) {
     return {
@@ -31,6 +34,7 @@ export default {
     if (booked) {
       return {
         ...transaction,
+        payeeName: formatPayeeName(transaction),
         date: transaction.bookingDate,
       };
     }
@@ -50,6 +54,7 @@ export default {
     if (transaction.valueDate !== undefined) {
       return {
         ...transaction,
+        payeeName: formatPayeeName(transaction),
         date: transaction.valueDate,
       };
     }
@@ -62,16 +67,13 @@ export default {
         transaction.valueDate = matches[1];
         return {
           ...transaction,
+          payeeName: formatPayeeName(transaction),
           date: matches[1],
         };
       }
     }
 
     return null;
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   /**

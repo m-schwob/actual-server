@@ -11,22 +11,21 @@ import {
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import { sha256String } from '../util/hash.js';
-import validateUser from '../util/validate-user.js';
+import {
+  requestLoggerMiddleware,
+  validateUserMiddleware,
+} from '../util/middlewares.js';
 
 const app = express();
+app.use(requestLoggerMiddleware);
+
 app.get('/link', function (req, res) {
   res.sendFile('link.html', { root: path.resolve('./src/app-gocardless') });
 });
 
 export { app as handlers };
 app.use(express.json());
-app.use(async (req, res, next) => {
-  let user = await validateUser(req, res);
-  if (!user) {
-    return;
-  }
-  next();
-});
+app.use(validateUserMiddleware);
 
 app.post('/status', async (req, res) => {
   res.send({
@@ -40,11 +39,10 @@ app.post('/status', async (req, res) => {
 app.post(
   '/create-web-token',
   handleError(async (req, res) => {
-    const { accessValidForDays, institutionId } = req.body;
+    const { institutionId } = req.body;
     const { origin } = req.headers;
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
-      accessValidForDays,
       institutionId,
       host: origin,
     });
@@ -147,7 +145,6 @@ app.post(
 
     try {
       const {
-        iban,
         balances,
         institutionId,
         startingBalance,
@@ -162,7 +159,6 @@ app.post(
       res.send({
         status: 'ok',
         data: {
-          iban: iban ? await sha256String(iban) : null,
           balances,
           institutionId,
           startingBalance,

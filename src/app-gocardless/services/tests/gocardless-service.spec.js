@@ -168,7 +168,6 @@ describe('goCardlessService', () => {
         ),
       ).toEqual(
         expect.objectContaining({
-          iban: mockAccountMetaData.iban,
           balances: mockedBalances.balances,
           institutionId: mockRequisition.institution_id,
           startingBalance: expect.any(Number),
@@ -242,6 +241,7 @@ describe('goCardlessService', () => {
 
     it('calls goCardlessClient and delete requisition', async () => {
       setTokenSpy.mockResolvedValue();
+      getInstitutionSpy.mockResolvedValue(mockInstitution);
 
       createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
 
@@ -255,6 +255,7 @@ describe('goCardlessService', () => {
 
     it('handle error if status_code present in the response', async () => {
       setTokenSpy.mockResolvedValue();
+      getInstitutionSpy.mockResolvedValue(mockInstitution);
 
       createRequisitionSpy.mockResolvedValue(mockUnknownError);
 
@@ -494,6 +495,7 @@ describe('goCardlessService', () => {
                   "iban": "string",
                 },
                 "debtorName": "string",
+                "payeeName": "String (stri XXX ring)",
                 "transactionAmount": {
                   "amount": "328.18",
                   "currency": "EUR",
@@ -505,6 +507,7 @@ describe('goCardlessService', () => {
                 "bankTransactionCode": "string",
                 "bookingDate": "date",
                 "date": "date",
+                "payeeName": "",
                 "transactionAmount": {
                   "amount": "947.26",
                   "currency": "EUR",
@@ -516,6 +519,7 @@ describe('goCardlessService', () => {
             "pending": [
               {
                 "date": "date",
+                "payeeName": "",
                 "transactionAmount": {
                   "amount": "947.26",
                   "currency": "EUR",

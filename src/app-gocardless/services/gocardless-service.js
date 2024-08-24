@@ -1,4 +1,4 @@
-import BankFactory from '../bank-factory.js';
+import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
 import {
   RequisitionNotLinked,
   AccountNotLinedToRequisition,
@@ -185,7 +185,7 @@ export const goCardlessService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{iban: string, balances: Array<import('../gocardless-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}, startingBalance: number}>}
+   * @returns {Promise<{balances: Array<import('../gocardless-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}, startingBalance: number}>}
    */
   getTransactionsWithBalance: async (
     requisitionId,
@@ -200,8 +200,7 @@ export const goCardlessService = {
       throw new AccountNotLinedToRequisition(accountId, requisitionId);
     }
 
-    const [accountMetadata, transactions, accountBalance] = await Promise.all([
-      goCardlessService.getAccountMetadata(accountId),
+    const [transactions, accountBalance] = await Promise.all([
       goCardlessService.getTransactions({
         institutionId: institution_id,
         accountId,
@@ -232,7 +231,6 @@ export const goCardlessService = {
     );
 
     return {
-      iban: accountMetadata.iban,
       balances: accountBalance.balances,
       institutionId: institution_id,
       startingBalance,
@@ -257,15 +255,22 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<{requisitionId, link}>}
    */
-  createRequisition: async ({ institutionId, accessValidForDays, host }) => {
+  createRequisition: async ({ institutionId, host }) => {
     await goCardlessService.setToken();
+
+    const institution = await goCardlessService.getInstitution(institutionId);
+    const bank = BankFactory(institutionId);
 
     const response = await client.initSession({
       redirectUrl: host + '/gocardless/link',
       institutionId,
       referenceId: uuid.v4(),
-      accessValidForDays,
-      maxHistoricalDays: 90,
+      accessValidForDays: bank.accessValidForDays,
+      maxHistoricalDays: BANKS_WITH_LIMITED_HISTORY.includes(institutionId)
+        ? Number(institution.transaction_total_days) >= 90
+          ? '89'
+          : institution.transaction_total_days
+        : institution.transaction_total_days,
       userLanguage: 'en',
       ssn: null,
       redirectImmediate: false,

@@ -1,12 +1,14 @@
 import Fallback from './integration-bank.js';
 
+import { formatPayeeName } from '../../util/payee-name.js';
+
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['BELFIUS_GKCCBEBB'],
 
-  normalizeAccount(account) {
-    return Fallback.normalizeAccount(account);
-  },
+  accessValidForDays: 180,
 
   // The problem is that we have transaction with duplicated transaction ids.
   // This is not expected and the nordigen api has a work-around for some backs
@@ -15,15 +17,8 @@ export default {
     return {
       ...transaction,
       transactionId: transaction.internalTransactionId,
+      payeeName: formatPayeeName(transaction),
       date: transaction.bookingDate || transaction.valueDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return Fallback.calculateStartingBalance(sortedTransactions, balances);
   },
 };
